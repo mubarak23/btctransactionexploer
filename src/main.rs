@@ -52,9 +52,10 @@ impl Error for CustomReqwestError {
 
 
 async fn fetch_transaction_details(txid_hex: &str, network: &str) -> Result<String, Box<dyn Error>> {
+   println!("Network Name: {:?}", network);
     let base_url = match network {
-        "Bitcoin" => "https://blockstream.info/api/tx/",
-        "Testnet" => "https://blockstream.info/testnet/api/tx/",
+        "bitcoin" => "https://blockstream.info/api/tx/",
+        "testnet" => "https://blockstream.info/testnet/api/tx/",
         _ => return Err(Box::new(CustomReqwestError::new("Invalid network"))),
     };
 // Create the full explorer URL.
@@ -82,7 +83,8 @@ fn main() {
     let txid_hex = txid_hex.trim();
     println!("User input at this point: {}", txid_hex);
     // Check the network and display the result.
-    let network = check_network(&txid_hex);
+     let network = check_network(&txid_hex);
+   
     let result = runtime::Runtime::new().unwrap().block_on(fetch_transaction_details(&txid_hex, &network));
 
     match result {
@@ -97,13 +99,19 @@ fn main() {
 }
 
 fn check_network(txid_hex: &str) -> String {
-    let txid_bytes = hex::decode(txid_hex).unwrap_or_default();
+    let mut txid_bytes= hex::decode(txid_hex).unwrap_or_default();
+   //  txid_bytes.reverse();
+    println!("Hex data for transaction: {:?}", txid_bytes);
     println!("Hex data for transaction: {}", txid_bytes.len());
-    if txid_bytes.len() == 32 && txid_bytes[0] == 0x00 {
+  
+    if let Some(first_char) = txid_hex.chars().next()  {
+        
+        if first_char.is_numeric() {
         Network::Bitcoin.to_string()
-    } else if txid_bytes.len() == 32 && txid_bytes[0] == 0x6f {
+       }else {
         Network::Testnet.to_string()
-    } else {
+       }
+   } else {
         "Invalid or unrecognized Bitcoin network".to_string()
     }
 }
