@@ -1,11 +1,9 @@
-#[warn(unused_imports)]
+
 
 extern crate bitcoin;
 extern  crate reqwest;
 extern crate hex;
 
-use bitcoin::util::address::Address;
-use bitcoin::blockdata::transaction::Transaction;
 use bitcoin::network::constants::Network;
 use std::error::Error;
 use std::fmt;
